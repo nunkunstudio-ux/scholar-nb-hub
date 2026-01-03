@@ -5,41 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ScholarNBHub | Assoc. Prof. Nunta Bootnoi</title>
     
-    <!-- 1. Tailwind CSS -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- 2. Font & Icons -->
+    <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- 3. Design System -->
+    <!-- Firebase SDK (Compat Version) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        serif: ['Playfair Display', 'serif'],
-                    },
-                    colors: {
-                        academic: {
-                            900: '#0f172a', // Navy Blue
-                            800: '#1e293b',
-                            100: '#f1f5f9',
-                            gold: '#d97706' // Amber/Gold
-                        }
-                    }
+                    fontFamily: { sans: ['Inter', 'sans-serif'], serif: ['Playfair Display', 'serif'] },
+                    colors: { academic: { 900: '#0f172a', 800: '#1e293b', 100: '#f1f5f9', gold: '#d97706' } }
                 }
             }
         }
     </script>
     <style>
         body { background-color: #f8fafc; }
-        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
-        .loading-spinner { border-top-color: #d97706; }
-        /* Image Hover Effect */
         .card-image { transition: transform 0.5s ease; }
         .group:hover .card-image { transform: scale(1.05); }
+        .admin-controls { opacity: 0; transition: opacity 0.3s; }
+        .group:hover .admin-controls { opacity: 1; }
     </style>
 </head>
 <body class="text-slate-800 antialiased flex flex-col min-h-screen">
@@ -47,27 +41,29 @@
     <!-- Navbar -->
     <nav class="bg-academic-900 text-white sticky top-0 z-50 shadow-lg">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <!-- Logo -->
-                <div class="flex items-center gap-3 cursor-pointer" onclick="renderApp('home')">
-                    <div class="bg-academic-gold w-10 h-10 rounded flex items-center justify-center text-academic-900 shadow-lg">
+            <div class="flex flex-col md:flex-row justify-between h-auto md:h-16 items-center py-3 md:py-0">
+                <div class="flex items-center gap-3 cursor-pointer mb-3 md:mb-0" onclick="renderApp('home')">
+                    <div class="bg-academic-gold w-10 h-10 rounded flex items-center justify-center text-academic-900 shadow-lg shrink-0">
                         <i class="fa-solid fa-book-open text-xl"></i>
                     </div>
-                    <div>
-                        <h1 class="font-serif text-xl font-bold tracking-wide">ScholarNBHub</h1>
-                        <p class="text-[10px] text-slate-400 uppercase tracking-wider">Digital Research Repository</p>
+                    <div class="flex flex-col sm:flex-row sm:items-baseline sm:gap-3">
+                        <h1 class="font-serif text-xl font-bold tracking-wide leading-none">ScholarNBHub</h1>
+                        <p class="text-[10px] text-slate-400 uppercase tracking-wider leading-none">Digital Research Repository</p>
+                    </div>
+                </div>
+                
+                <!-- Menu -->
+                <div class="order-3 md:order-2 w-full md:w-auto mt-2 md:mt-0">
+                    <div class="flex flex-wrap justify-center gap-4 md:gap-8 text-sm font-medium">
+                        <button onclick="renderApp('home')" class="hover:text-academic-gold transition"><i class="fa-solid fa-house mr-1"></i> Home</button>
+                        <button onclick="filterContent('app')" class="hover:text-academic-gold transition"><i class="fa-solid fa-microchip mr-1"></i> Apps</button>
+                        <button onclick="filterContent('game')" class="hover:text-academic-gold transition"><i class="fa-solid fa-gamepad mr-1"></i> Games</button>
+                        <button onclick="filterContent('ebook')" class="hover:text-academic-gold transition"><i class="fa-solid fa-book mr-1"></i> E-Books</button>
+                        <button onclick="filterContent('clip')" class="hover:text-academic-gold transition"><i class="fa-solid fa-video mr-1"></i> Clips</button>
                     </div>
                 </div>
 
-                <!-- Menu (Desktop) -->
-                <div class="hidden md:flex space-x-8 text-sm font-medium">
-                    <button onclick="renderApp('home')" class="hover:text-academic-gold transition">Home</button>
-                    <button onclick="filterContent('app')" class="hover:text-academic-gold transition">AI Solutions</button>
-                    <button onclick="filterContent('clip')" class="hover:text-academic-gold transition">Media & Clips</button>
-                </div>
-
-                <!-- Admin Button -->
-                <div id="auth-section">
+                <div id="auth-section" class="order-2 md:order-3">
                     <button onclick="openLoginModal()" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded text-xs font-bold transition border border-slate-700">
                         <i class="fa-solid fa-user"></i> Access Portal
                     </button>
@@ -76,23 +72,21 @@
         </div>
     </nav>
 
-    <!-- Main Content Area -->
-    <main id="main-container" class="flex-grow">
-        <!-- Content injected via JS -->
-    </main>
+    <!-- Main Content -->
+    <main id="main-container" class="flex-grow"></main>
 
     <!-- Footer -->
     <footer class="bg-academic-900 text-slate-400 py-10 mt-auto border-t border-slate-800">
         <div class="max-w-7xl mx-auto px-4 text-center">
-            <div class="mb-4">
-                <i class="fa-solid fa-graduation-cap text-2xl text-academic-gold mb-2"></i>
-                <p class="font-serif text-white text-lg">ScholarNBHub Repository</p>
-            </div>
+            <p class="font-serif text-white text-lg">ScholarNBHub Repository</p>
             <p class="text-sm opacity-60">© 2024 Assoc. Prof. Nunta Bootnoi. All rights reserved.</p>
+            <div class="mt-3 text-sm text-slate-500">
+                <a href="mailto:nunta@lpru.ac.th" class="hover:text-academic-gold transition mx-2"><i class="fa-solid fa-envelope mr-1"></i> nunta@lpru.ac.th</a>
+                <span class="text-slate-700">|</span>
+                <a href="mailto:nunta2015@icloud.com" class="hover:text-academic-gold transition mx-2"><i class="fa-solid fa-envelope mr-1"></i> nunta2015@icloud.com</a>
+            </div>
         </div>
     </footer>
-
-    <!-- ================= MODALS ================= -->
 
     <!-- Login Modal -->
     <div id="login-modal" class="fixed inset-0 bg-academic-900/90 hidden z-[60] flex items-center justify-center backdrop-blur-sm p-4">
@@ -109,68 +103,75 @@
         </div>
     </div>
 
-    <!-- Submission Modal -->
+    <!-- Submission/Edit Modal -->
     <div id="submit-modal" class="fixed inset-0 bg-academic-900/90 hidden z-[60] flex items-center justify-center backdrop-blur-sm p-4">
         <div class="bg-white rounded-xl p-8 w-full max-w-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto border-t-4 border-academic-gold">
             <button onclick="closeModal('submit-modal')" class="absolute top-4 right-4 text-slate-400 hover:text-red-500"><i class="fa-solid fa-xmark fa-lg"></i></button>
             
             <div class="flex items-center gap-4 mb-6 border-b pb-4">
-                <div class="bg-academic-100 p-3 rounded-lg">
-                    <i class="fa-solid fa-cloud-arrow-up text-academic-900 text-xl"></i>
-                </div>
+                <div class="bg-academic-100 p-3 rounded-lg"><i class="fa-solid fa-pen-to-square text-academic-900 text-xl"></i></div>
                 <div>
-                    <h2 class="font-serif text-2xl font-bold text-academic-900">New Submission</h2>
-                    <p class="text-sm text-slate-500">Publish AI Artifacts, HTML Apps, or Clips.</p>
+                    <h2 id="modal-title" class="font-serif text-2xl font-bold text-academic-900">Manage Content</h2>
+                    <p class="text-sm text-slate-500">Add or edit resource details.</p>
                 </div>
             </div>
 
             <form onsubmit="handleSubmit(event)" class="space-y-5">
+                <input type="hidden" id="edit-id"> <!-- Hidden ID for Edit Mode -->
+                
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Resource Type</label>
                         <select id="sub-type" class="w-full p-3 border rounded bg-white">
                             <option value="app">AI Application</option>
+                            <option value="game">Game</option>
+                            <option value="ebook">E-Book</option>
                             <option value="clip">Video Clip</option>
                         </select>
                     </div>
                 </div>
 
-                <!-- Toggle Source -->
+                <!-- Content Source -->
                 <div class="bg-slate-50 p-4 rounded border border-slate-200">
-                    <div class="flex gap-6 mb-3 border-b border-slate-200 pb-2 text-sm font-bold">
-                        <label class="flex items-center gap-2 cursor-pointer group">
-                            <input type="radio" name="sourceType" value="link" checked onchange="toggleSource(this.value)" class="accent-academic-gold">
-                            <span class="group-hover:text-academic-gold transition">External Link</span>
+                    <h4 class="text-xs font-bold text-academic-900 uppercase mb-3"><i class="fa-solid fa-link"></i> Content Source (App/Game/E-Book)</h4>
+                    <div class="flex gap-6 mb-3 text-sm">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="sourceType" value="link" checked onchange="toggleSource(this.value)" class="accent-academic-gold"> External Link
                         </label>
-                        <label class="flex items-center gap-2 cursor-pointer group">
-                            <input type="radio" name="sourceType" value="file" onchange="toggleSource(this.value)" class="accent-academic-gold">
-                            <span class="group-hover:text-academic-gold transition flex items-center gap-1"><i class="fa-solid fa-file-code"></i> Upload HTML App</span>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="sourceType" value="file" onchange="toggleSource(this.value)" class="accent-academic-gold"> Upload File
                         </label>
                     </div>
-
-                    <!-- Input: URL -->
                     <div id="input-url-group">
                         <input type="url" id="sub-url" placeholder="https://..." class="w-full p-3 border rounded text-sm font-mono text-slate-600">
-                        <p class="text-[10px] text-slate-400 mt-1">*YouTube link or deployed App URL (Streamlit/HuggingFace)</p>
                     </div>
-
-                    <!-- Input: File -->
                     <div id="input-file-group" class="hidden">
-                        <div class="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:border-academic-gold hover:bg-amber-50 transition cursor-pointer relative">
-                            <input type="file" id="sub-file" accept=".html,.htm" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
-                            <div class="pointer-events-none">
-                                <i class="fa-solid fa-upload text-2xl text-slate-400 mb-2"></i>
-                                <p class="text-sm font-bold text-slate-600">Click to select HTML File</p>
-                                <p class="text-xs text-slate-400">Single file AI apps (e.g. from Gemini)</p>
-                            </div>
-                        </div>
-                        <p id="file-name-display" class="text-xs text-academic-gold font-bold mt-2 text-center"></p>
+                        <input type="file" id="sub-file" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-academic-gold file:text-white hover:file:bg-amber-600">
+                    </div>
+                </div>
+
+                <!-- Cover Image -->
+                <div class="bg-slate-50 p-4 rounded border border-slate-200">
+                    <h4 class="text-xs font-bold text-academic-900 uppercase mb-3"><i class="fa-regular fa-image"></i> Cover Image (Optional)</h4>
+                    <div class="flex gap-6 mb-3 text-sm">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="coverType" value="link" checked onchange="toggleCover(this.value)" class="accent-academic-gold"> Image URL
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="coverType" value="file" onchange="toggleCover(this.value)" class="accent-academic-gold"> Upload Image
+                        </label>
+                    </div>
+                    <div id="input-cover-url-group">
+                        <input type="url" id="sub-cover-url" placeholder="https://image.com/cover.jpg" class="w-full p-3 border rounded text-sm font-mono text-slate-600">
+                    </div>
+                    <div id="input-cover-file-group" class="hidden">
+                        <input type="file" id="sub-cover-file" accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-slate-700 file:text-white hover:file:bg-slate-600">
                     </div>
                 </div>
 
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Title</label>
-                    <input type="text" id="sub-title" required placeholder="Project Title" class="w-full p-3 border rounded font-serif text-lg">
+                    <input type="text" id="sub-title" required class="w-full p-3 border rounded font-serif text-lg">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Description</label>
@@ -178,21 +179,21 @@
                 </div>
 
                 <button type="submit" id="btn-publish" class="w-full bg-academic-900 text-white font-bold py-4 rounded hover:bg-slate-800 transition flex items-center justify-center gap-2 shadow-lg">
-                    <i class="fa-solid fa-paper-plane"></i> Publish to Repository
+                    <i class="fa-solid fa-save"></i> Save Changes
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- 4. JAVASCRIPT LOGIC -->
+    <!-- Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, getDocs, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         // ==========================================
-        // ?? CONFIGURATION
+        // ?? FIREBASE CONFIGURATION
         // ==========================================
 	const firebaseConfig = {
   	  apiKey: "AIzaSyDdh9O5_Y88m1h4rM0hI3QZESTnRpKeH7c",
@@ -203,255 +204,260 @@
   	  appId: "1:338602945202:web:9196c60feb0853410837ab",
   	  measurementId: "G-CB4QWN0EKZ"
 	};
+        // ==========================================
 
-        // Init
-        let app, db, storage, auth;
-        let isFirebaseReady = false;
+        let db, storage, auth;
+        let isReady = false;
 
         try {
             if (!firebaseConfig.apiKey.includes("...")) {
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                storage = getStorage(app);
-                auth = getAuth(app);
-                signInAnonymously(auth);
-                isFirebaseReady = true;
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.firestore();
+                storage = firebase.storage();
+                auth = firebase.auth();
+                auth.signInAnonymously().catch(console.error);
+                isReady = true;
             }
-        } catch (e) { console.warn("Running in Demo Mode"); }
+        } catch(e) { console.warn("Demo Mode"); }
 
-        // Mock Data with Images
+        // Demo Data (Includes Games & Ebooks)
         const demoData = [
-            { 
-                id: 1, type: 'app', title: 'Neural Network Simulation', 
-                desc: 'An interactive visualization of simple perceptron learning logic.', 
-                url: '#', 
-                image: 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=500&auto=format&fit=crop',
-                date: '2024-01-01' 
-            },
-            { 
-                id: 2, type: 'clip', title: 'Lecture 1: AI Fundamentals', 
-                desc: 'Introduction to Artificial Intelligence concepts and history.', 
-                url: 'https://www.youtube.com/embed/dQw4w9WgXcQ', 
-                image: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=500&auto=format&fit=crop',
-                date: '2024-01-02' 
-            },
-            { 
-                id: 3, type: 'app', title: 'Sentiment Analysis Tool', 
-                desc: 'NLP model for analyzing text sentiment in real-time.', 
-                url: '#', 
-                image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500&auto=format&fit=crop',
-                date: '2024-01-03' 
-            }
+            { id: 'd1', type: 'game', title: 'Space Explorer', desc: 'A WebGL space exploration game built with Three.js.', url: '#', image: 'https://images.unsplash.com/photo-1614728263952-84ea256f9679?w=500', date: '2024-01-05' },
+            { id: 'd2', type: 'ebook', title: 'AI Ethics Handbook', desc: 'Comprehensive guide to ethical AI development.', url: '#', image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500', date: '2024-01-04' },
+            { id: 'd3', type: 'app', title: 'Neural Network Sim', desc: 'Interactive visualization of perceptron logic.', url: '#', image: 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=500', date: '2024-01-01' }
         ];
 
         let isAdmin = false;
+        let currentResources = [];
 
-        // Render Functions
-        window.renderApp = async function(view) {
+        window.renderApp = async (view) => {
             const container = document.getElementById('main-container');
             
-            // Hero Section with Image
-            let heroHTML = '';
-            if (view === 'home') {
-                heroHTML = `
-                <div class="relative bg-academic-900 text-white overflow-hidden">
-                    <div class="absolute inset-0">
-                        <img src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=1000&auto=format&fit=crop" class="w-full h-full object-cover opacity-20" alt="AI Background">
-                        <div class="absolute inset-0 bg-gradient-to-r from-academic-900 via-academic-900/90 to-transparent"></div>
-                    </div>
-                    <div class="relative max-w-7xl mx-auto px-4 py-20 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center gap-12">
-                        <div class="flex-1 space-y-6">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur rounded-full border border-white/20 text-xs font-bold text-academic-gold">
-                                <span class="w-2 h-2 rounded-full bg-academic-gold animate-pulse"></span> NEW RESEARCH
-                            </div>
-                            <h2 class="text-4xl md:text-6xl font-serif font-bold leading-tight drop-shadow-lg">
-                                Frontiers of <br>
-                                <span class="text-transparent bg-clip-text bg-gradient-to-r from-academic-gold to-yellow-200">Artificial Intelligence</span>
-                            </h2>
-                            <p class="text-slate-300 text-lg max-w-2xl leading-relaxed">
-                                A curated digital repository of experimental applications, generated media, and computational research by <strong class="text-white">Assoc. Prof. Nunta Bootnoi</strong>.
-                            </p>
-                            <div class="pt-2 flex flex-wrap gap-4">
-                                <button onclick="filterContent('app')" class="px-8 py-3 bg-academic-gold hover:bg-amber-600 text-white font-bold rounded shadow-lg shadow-amber-900/50 transition transform hover:-translate-y-1">
-                                    <i class="fa-solid fa-microchip mr-2"></i> Explore Apps
-                                </button>
-                                <button onclick="filterContent('clip')" class="px-8 py-3 bg-white/10 hover:bg-white/20 backdrop-blur border border-white/30 text-white rounded transition">
-                                    <i class="fa-solid fa-play mr-2"></i> Watch Findings
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>`;
-            }
+            // Dynamic Hero Section
+            let heroTitle = "Frontiers of <span class='text-transparent bg-clip-text bg-gradient-to-r from-academic-gold to-yellow-200'>Knowledge</span>";
+            let heroImg = "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1000&auto=format&fit=crop";
+            
+            if(view === 'app') { heroTitle = "Intelligent <span class='text-academic-gold'>AI Solutions</span>"; heroImg = "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=1000"; }
+            if(view === 'game') { heroTitle = "Interactive <span class='text-academic-gold'>Simulations & Games</span>"; heroImg = "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1000"; }
+            if(view === 'ebook') { heroTitle = "Digital <span class='text-academic-gold'>Library & E-Books</span>"; heroImg = "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=1000"; }
+            if(view === 'clip') { heroTitle = "Educational <span class='text-academic-gold'>Media & Clips</span>"; heroImg = "https://images.unsplash.com/photo-1492619856729-10674e5c00dd?w=1000"; }
 
-            // Grid
-            let contentHTML = `
-                <div class="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
-                    <div class="flex justify-between items-end mb-8 border-b pb-4">
-                        <div>
-                            <h3 class="text-3xl font-serif font-bold text-academic-900">
-                                ${view === 'home' ? 'Recent Findings' : (view === 'app' ? 'AI Applications' : 'Media Repository')}
-                            </h3>
-                            <p class="text-slate-500 mt-1">Access artifacts directly from the database.</p>
-                        </div>
-                        ${isAdmin ? `<button onclick="openModal('submit-modal')" class="bg-academic-900 text-white px-4 py-2 rounded text-sm font-bold hover:bg-slate-700 transition shadow"><i class="fa-solid fa-plus mr-1"></i> Add Submission</button>` : ''}
-                    </div>
-                    
-                    <div id="resource-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        <div class="col-span-full text-center py-20">
-                            <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-slate-200 loading-spinner mb-4"></div>
-                            <p class="text-slate-400">Syncing with Cloud...</p>
-                        </div>
+            // Condition to show Hero on all main pages
+            let showHero = ['home', 'app', 'game', 'ebook', 'clip'].includes(view);
+
+            let heroHTML = showHero ? `
+            <div class="relative bg-academic-900 text-white overflow-hidden shadow-2xl">
+                <!-- Background Layer with Image + Dark Overlay -->
+                <div class="absolute inset-0">
+                    <img src="${heroImg}" class="w-full h-full object-cover opacity-50" alt="Background">
+                    <div class="absolute inset-0 bg-gradient-to-r from-academic-900/95 via-academic-900/80 to-academic-900/50"></div>
+                </div>
+                <!-- Content Layer -->
+                <div class="relative max-w-7xl mx-auto px-4 py-20 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center gap-12">
+                    <div class="flex-1 space-y-6">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur rounded-full border border-white/20 text-xs font-bold text-academic-gold"><span class="w-2 h-2 rounded-full bg-academic-gold animate-pulse"></span> SCHOLAR HUB</div>
+                        <h2 class="text-4xl md:text-5xl font-serif font-bold leading-tight drop-shadow-lg">${heroTitle}</h2>
+                        <p class="text-slate-300 text-lg max-w-2xl leading-relaxed">Curated resources, applications, and research materials by <strong class="text-white whitespace-nowrap">Assoc. Prof. Nunta Bootnoi</strong>.</p>
                     </div>
                 </div>
-            `;
+            </div>` : '';
+
+            let contentHTML = `
+            <div class="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-end mb-8 border-b pb-4">
+                    <div>
+                        <h3 class="text-3xl font-serif font-bold text-academic-900 capitalize">${view === 'home' ? 'Latest Updates' : view + 's Repository'}</h3>
+                    </div>
+                    ${isAdmin ? `<button onclick="openModal('submit-modal')" class="bg-academic-900 text-white px-4 py-2 rounded text-sm font-bold hover:bg-slate-700 transition shadow"><i class="fa-solid fa-plus mr-1"></i> Add New</button>` : ''}
+                </div>
+                <div id="resource-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"><div class="col-span-full text-center py-20"><p class="text-slate-400">Loading...</p></div></div>
+            </div>`;
 
             container.innerHTML = heroHTML + contentHTML;
             await loadResources(view);
-        }
+        };
 
         async function loadResources(viewFilter) {
-            let data = [];
-            if (isFirebaseReady) {
+            let data = demoData;
+            if (isReady) {
                 try {
-                    const q = query(collection(db, "resources"), orderBy("createdAt", "desc"));
-                    const snapshot = await getDocs(q);
-                    data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                } catch (e) { data = demoData; }
-            } else {
-                data = demoData;
+                    const snapshot = await db.collection("resources").orderBy("createdAt", "desc").get();
+                    if (!snapshot.empty) {
+                        data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    }
+                } catch (e) { console.error("DB Error:", e); }
             }
-
+            currentResources = data;
             let displayData = viewFilter !== 'home' ? data.filter(i => i.type === viewFilter) : data.slice(0, 6);
             renderGrid(displayData);
         }
 
         function renderGrid(items) {
             const grid = document.getElementById('resource-grid');
-            if (!items.length) {
-                grid.innerHTML = `<div class="col-span-full text-center py-16 bg-slate-50 rounded-xl border-2 border-dashed border-slate-300"><i class="fa-regular fa-folder-open text-4xl text-slate-300 mb-2"></i><p class="text-slate-500">No items found in this section.</p></div>`;
-                return;
-            }
-
+            if (!items.length) { grid.innerHTML = `<div class="col-span-full text-center py-16 bg-slate-50 rounded-xl border-2 border-dashed"><p class="text-slate-500">No items found.</p></div>`; return; }
+            
             grid.innerHTML = items.map(item => {
                 let mediaContent;
                 const isYouTube = item.url && (item.url.includes('youtube') || item.url.includes('youtu.be'));
-
+                
                 if (item.type === 'clip' && isYouTube) {
                     const vId = item.url.split('v=')[1]?.split('&')[0] || item.url.split('/').pop();
-                    mediaContent = `<iframe src="https://www.youtube.com/embed/${vId}" class="w-full h-full object-cover" loading="lazy" frameborder="0"></iframe>`;
+                    mediaContent = `<iframe src="https://www.youtube.com/embed/${vId}" class="w-full h-full object-cover" frameborder="0"></iframe>`;
                 } else {
-                    // Use uploaded image or fallback
-                    const imgUrl = item.image || (item.type === 'app' 
-                        ? 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=500&auto=format&fit=crop' 
-                        : 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=500&auto=format&fit=crop');
-                    
+                    const imgUrl = item.image || 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=500&auto=format&fit=crop';
                     mediaContent = `
-                        <img src="${imgUrl}" class="w-full h-full object-cover card-image group-hover:opacity-90" alt="${item.title}">
+                        <img src="${imgUrl}" class="w-full h-full object-cover card-image group-hover:opacity-90">
                         <div class="absolute inset-0 bg-academic-900/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300 backdrop-blur-sm">
-                            <a href="${item.url}" target="_blank" class="bg-academic-gold text-white px-6 py-3 rounded-full font-bold shadow-xl transform translate-y-4 group-hover:translate-y-0 transition flex items-center gap-2 hover:bg-amber-500">
-                                <i class="fa-solid fa-rocket"></i> Launch
+                            <a href="${item.url}" target="_blank" class="bg-academic-gold text-white px-6 py-3 rounded-full font-bold shadow-xl hover:scale-105 transition flex items-center gap-2">
+                                <i class="fa-solid fa-rocket"></i> Open
                             </a>
                         </div>
                     `;
                 }
 
+                // Admin Buttons
+                const adminBtns = isAdmin ? `
+                    <div class="absolute top-2 right-2 flex gap-2 admin-controls z-10">
+                        <button onclick="editItem('${item.id}')" class="bg-white/90 text-blue-600 p-2 rounded-full shadow hover:bg-white"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="deleteItem('${item.id}')" class="bg-white/90 text-red-600 p-2 rounded-full shadow hover:bg-white"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                ` : '';
+
+                // Type Badge
+                let typeIcon = 'fa-code';
+                let typeColor = 'text-blue-600';
+                if(item.type === 'game') { typeIcon = 'fa-gamepad'; typeColor = 'text-purple-600'; }
+                if(item.type === 'ebook') { typeIcon = 'fa-book'; typeColor = 'text-green-600'; }
+                if(item.type === 'clip') { typeIcon = 'fa-video'; typeColor = 'text-red-600'; }
+
                 return `
-                <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col h-full group border border-slate-100">
+                <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col h-full group border border-slate-100 relative">
+                    ${adminBtns}
                     <div class="h-56 relative bg-slate-200 overflow-hidden">
                         ${mediaContent}
-                        <div class="absolute top-3 right-3 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-academic-900 shadow-sm border border-slate-200">
-                            ${item.type === 'app' ? '<i class="fa-solid fa-code mr-1 text-blue-600"></i> App' : '<i class="fa-solid fa-video mr-1 text-red-600"></i> Clip'}
+                        <div class="absolute top-3 left-3 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-academic-900 shadow-sm">
+                            <i class="fa-solid ${typeIcon} mr-1 ${typeColor}"></i> ${item.type}
                         </div>
                     </div>
-                    <div class="p-6 flex flex-col flex-grow relative">
+                    <div class="p-6 flex flex-col flex-grow">
                         <h4 class="font-serif font-bold text-xl leading-snug mb-3 text-academic-900 group-hover:text-academic-gold transition">${item.title}</h4>
                         <p class="text-sm text-slate-600 line-clamp-3 mb-4 leading-relaxed font-light">${item.desc}</p>
-                        <div class="mt-auto pt-4 border-t border-slate-100 flex justify-between items-center text-xs text-slate-400">
-                            <span><i class="fa-regular fa-calendar mr-1"></i> Recently Added</span>
-                            <a href="${item.url}" target="_blank" class="text-slate-600 font-bold hover:text-academic-gold flex items-center gap-1 transition">
-                                OPEN <i class="fa-solid fa-arrow-right"></i>
-                            </a>
-                        </div>
                     </div>
                 </div>`;
             }).join('');
         }
 
-        // Logic
-        window.openLoginModal = () => isAdmin ? (isAdmin=false, updateAuthUI(), renderApp('home')) : document.getElementById('login-modal').classList.remove('hidden');
-        window.handleLogin = (e) => {
-            e.preventDefault();
-            if(document.getElementById('admin-pass').value === 'admin1234') {
-                isAdmin = true; updateAuthUI(); closeModal('login-modal'); renderApp('home');
-            } else alert('Wrong passcode!');
-        };
-        window.updateAuthUI = () => {
-            const btn = document.querySelector('#auth-section button');
-            if (isAdmin) {
-                btn.innerHTML = `<i class="fa-solid fa-right-from-bracket"></i> Logout`;
-                btn.classList.replace('bg-slate-800', 'bg-red-600');
-            } else {
-                btn.innerHTML = `<i class="fa-solid fa-user"></i> Access Portal`;
-                btn.classList.replace('bg-red-600', 'bg-slate-800');
+        // ================= ACTION LOGIC =================
+
+        window.openModal = (id) => {
+            document.getElementById(id).classList.remove('hidden');
+            if(id === 'submit-modal') {
+                // Reset form for new entry
+                document.getElementById('modal-title').innerText = "New Submission";
+                document.getElementById('edit-id').value = "";
+                document.querySelector('form').reset();
             }
         };
 
-        // File Selection Display
-        document.getElementById('sub-file')?.addEventListener('change', function(e) {
-            const fileName = e.target.files[0]?.name;
-            document.getElementById('file-name-display').innerText = fileName ? `Selected: ${fileName}` : '';
-        });
+        window.editItem = (id) => {
+            const item = currentResources.find(r => r.id === id);
+            if(!item) return;
+            
+            document.getElementById('modal-title').innerText = "Edit Content";
+            document.getElementById('edit-id').value = item.id;
+            document.getElementById('sub-type').value = item.type;
+            document.getElementById('sub-title').value = item.title;
+            document.getElementById('sub-desc').value = item.desc;
+            
+            // Set URL (default to link mode)
+            document.querySelector('input[name="sourceType"][value="link"]').checked = true;
+            toggleSource('link');
+            document.getElementById('sub-url').value = item.url;
+
+            // Set Cover (default to link mode for ease)
+            document.querySelector('input[name="coverType"][value="link"]').checked = true;
+            toggleCover('link');
+            document.getElementById('sub-cover-url').value = item.image || "";
+
+            openModal('submit-modal');
+        };
+
+        window.deleteItem = async (id) => {
+            if(!confirm("Are you sure you want to delete this item?")) return;
+            if(isReady) {
+                try {
+                    await db.collection("resources").doc(id).delete();
+                    alert("Deleted successfully.");
+                    renderApp('home');
+                } catch(e) { alert("Delete failed: " + e.message); }
+            } else {
+                alert("Demo Mode: Item deleted (visually).");
+                document.querySelector(`button[onclick="deleteItem('${id}')"]`).closest('.group').remove();
+            }
+        };
 
         window.handleSubmit = async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btn-publish');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Uploading...`;
-            btn.disabled = true;
-
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Processing...`; btn.disabled = true;
+            
+            const id = document.getElementById('edit-id').value; // If ID exists -> Update
             const type = document.getElementById('sub-type').value;
             const title = document.getElementById('sub-title').value;
             const desc = document.getElementById('sub-desc').value;
-            const sourceType = document.querySelector('input[name="sourceType"]:checked').value;
             
+            // Handle Content Source
+            let finalUrl = document.getElementById('sub-url').value;
+            const sourceType = document.querySelector('input[name="sourceType"]:checked').value;
+            if(sourceType === 'file' && isReady) {
+                const file = document.getElementById('sub-file').files[0];
+                if(file) {
+                    const ref = storage.ref('apps/' + Date.now() + '-' + file.name);
+                    await ref.put(file, { contentType: 'text/html' });
+                    finalUrl = await ref.getDownloadURL();
+                } else if (!id) { alert("Please select a file."); btn.disabled = false; return; }
+            }
+
+            // Handle Cover Image
+            let finalImg = document.getElementById('sub-cover-url').value;
+            const coverType = document.querySelector('input[name="coverType"]:checked').value;
+            if(coverType === 'file' && isReady) {
+                const imgFile = document.getElementById('sub-cover-file').files[0];
+                if(imgFile) {
+                    const ref = storage.ref('covers/' + Date.now() + '-' + imgFile.name);
+                    await ref.put(imgFile);
+                    finalImg = await ref.getDownloadURL();
+                }
+            }
+
+            const data = { type, title, desc, url: finalUrl, image: finalImg };
+            if(!id) data.createdAt = firebase.firestore.FieldValue.serverTimestamp(); // Only add timestamp on create
+
             try {
-                let finalUrl = '';
+                if(isReady) {
+                    if(id) {
+                        await db.collection("resources").doc(id).update(data);
+                        alert("Updated successfully!");
+                    } else {
+                        await db.collection("resources").add(data);
+                        alert("Published successfully!");
+                    }
+                } else { alert("Demo Mode: Success"); }
                 
-                if (sourceType === 'link') {
-                    finalUrl = document.getElementById('sub-url').value;
-                } else {
-                    if (!isFirebaseReady) throw new Error("Please configure Firebase first.");
-                    const file = document.getElementById('sub-file').files[0];
-                    if (!file) throw new Error("Please select an HTML file.");
-
-                    // IMPORTANT: Set Content-Type so browser renders it instead of downloading
-                    const metadata = { contentType: 'text/html' };
-                    const storageRef = ref(storage, 'apps/' + Date.now() + '-' + file.name);
-                    
-                    const snapshot = await uploadBytes(storageRef, file, metadata);
-                    finalUrl = await getDownloadURL(snapshot.ref);
-                }
-
-                if (isFirebaseReady) {
-                    await addDoc(collection(db, "resources"), { type, title, desc, url: finalUrl, createdAt: serverTimestamp() });
-                    alert("Published!");
-                } else {
-                    alert("Demo Mode: Success (Not saved to cloud)");
-                }
-                closeModal('submit-modal');
+                closeModal('submit-modal'); 
                 renderApp('home');
-            } catch (err) { alert(err.message); } 
-            finally { btn.innerHTML = originalText; btn.disabled = false; }
+            } catch(err) { alert(err.message); }
+            finally { btn.innerHTML = `<i class="fa-solid fa-save"></i> Save`; btn.disabled = false; }
         };
 
+        // UI Helpers
+        window.openLoginModal = () => isAdmin ? (isAdmin=false, updateAuthUI(), renderApp('home')) : document.getElementById('login-modal').classList.remove('hidden');
+        window.handleLogin = (e) => { e.preventDefault(); if(document.getElementById('admin-pass').value === 'admin1234') { isAdmin=true; updateAuthUI(); closeModal('login-modal'); renderApp('home'); } else alert('Wrong!'); };
+        window.updateAuthUI = () => { const btn = document.querySelector('#auth-section button'); if(isAdmin) { btn.innerHTML = `<i class="fa-solid fa-right-from-bracket"></i> Logout`; btn.classList.replace('bg-slate-800','bg-red-600'); } else { btn.innerHTML = `<i class="fa-solid fa-user"></i> Access Portal`; btn.classList.replace('bg-red-600','bg-slate-800'); } };
         window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
-        window.openModal = (id) => document.getElementById(id).classList.remove('hidden');
         window.filterContent = (t) => renderApp(t);
-        window.toggleSource = (v) => {
-            document.getElementById('input-url-group').classList.toggle('hidden', v !== 'link');
-            document.getElementById('input-file-group').classList.toggle('hidden', v === 'link');
-        };
+        window.toggleSource = (v) => { document.getElementById('input-url-group').classList.toggle('hidden', v!=='link'); document.getElementById('input-file-group').classList.toggle('hidden', v==='link'); };
+        window.toggleCover = (v) => { document.getElementById('input-cover-url-group').classList.toggle('hidden', v!=='link'); document.getElementById('input-cover-file-group').classList.toggle('hidden', v==='link'); };
 
         renderApp('home');
     </script>
