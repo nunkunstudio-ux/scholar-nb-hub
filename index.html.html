@@ -79,7 +79,7 @@
     <footer class="bg-academic-900 text-slate-400 py-10 mt-auto border-t border-slate-800">
         <div class="max-w-7xl mx-auto px-4 text-center">
             <p class="font-serif text-white text-lg">ScholarNBHub Repository</p>
-            <p class="text-sm opacity-60">© 2024 Assoc. Prof. Nunta Bootnoi. All rights reserved.</p>
+            <p class="text-sm opacity-60">Â© 2024 Assoc. Prof. Nunta Bootnoi. All rights reserved.</p>
             <div class="mt-3 text-sm text-slate-500">
                 <a href="mailto:nunta@lpru.ac.th" class="hover:text-academic-gold transition mx-2"><i class="fa-solid fa-envelope mr-1"></i> nunta@lpru.ac.th</a>
                 <span class="text-slate-700">|</span>
@@ -452,7 +452,7 @@
 
         // UI Helpers
         window.openLoginModal = () => isAdmin ? (isAdmin=false, updateAuthUI(), renderApp('home')) : document.getElementById('login-modal').classList.remove('hidden');
-        window.handleLogin = (e) => { e.preventDefault(); if(document.getElementById('admin-pass').value === 'admin1234') { isAdmin=true; updateAuthUI(); closeModal('login-modal'); renderApp('home'); } else alert('Wrong!'); };
+        window.handleLogin = (e) => { e.preventDefault(); if(document.getElementById('admin-pass').value === 'admin552912') { isAdmin=true; updateAuthUI(); closeModal('login-modal'); renderApp('home'); } else alert('Wrong!'); };
         window.updateAuthUI = () => { const btn = document.querySelector('#auth-section button'); if(isAdmin) { btn.innerHTML = `<i class="fa-solid fa-right-from-bracket"></i> Logout`; btn.classList.replace('bg-slate-800','bg-red-600'); } else { btn.innerHTML = `<i class="fa-solid fa-user"></i> Access Portal`; btn.classList.replace('bg-red-600','bg-slate-800'); } };
         window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
         window.filterContent = (t) => renderApp(t);
